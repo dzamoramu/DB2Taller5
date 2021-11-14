@@ -1,24 +1,52 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Profile Page</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.min.css">
-    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
-  </head>
-  <body>
-    <section class="hero is-success is-fullheight">
-      <div class="hero-body">
-        <div class="container">
-          <h1 class="title">
-            Propietario {{g.user.username}}'s  
-          </h1>
-          <h2 class="subtitle">
-            Su numero de usuario es #{{g.user.id}}
-          </h2>
-        </div>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Profile Page</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='../static/styles.css') }}">
+  <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+
+</head>
+
+<body>
+  <section class="hero is-success is-fullheight">
+    <div class="hero-body Contenedor sombra">
+      <h1 class="title">
+        Propietario {{g.user.username}} Su numero de usuario es # {{g.user.id}}
+      </h1>
+      <div id="contacto" class="contacto">
+        <h2>Registro Mascotas</h2>
+        <form class="formulario" action="#" method="POST">
+          <legend>Formulario de Registro, llena todos los campos</legend>
+          <div class="contenedor-campos">
+            <div class="campo">
+              <label>Nombre Propietario</label>
+              <input type="text" name="nombre" placeholder="Nombre" required>
+            </div>
+            <div class="campo">
+              <label>Categoría</label>
+              <select class="formulario__campo">
+                <option>Canina</option>
+                <option>Felina</option>
+              </select>
+            </div>
+            <div class="campo">
+              <label>Fotografía </label>
+              <input type="text" name="telefono" placeholder="url">
+          </div>
+          </div>
+          <!--.contenedor-campos-->
+          <div class="enviar">
+            <input class="boton" type="submit" value="Registar">
+          </div>
+        </form>
       </div>
-    </section>
-  </body>
+
+    </div>
+    </div>
+  </section>
+</body>
+
 </html>
