@@ -63,6 +63,7 @@ app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.secret_key = 'somesecretkeythatonlyishouldknow'
 
+
 @app.before_request
 def before_request():
     g.user = None
@@ -92,6 +93,7 @@ def login():
 def profile():
     if not g.user:
         return redirect(url_for('login'))
+
     return render_template('profile.html')
 
 @app.route('/listarMascotas')
@@ -104,4 +106,3 @@ def listar():
                                                                                        100)})))
     print(results)
     return render_template('listarMascotas.html')
-
