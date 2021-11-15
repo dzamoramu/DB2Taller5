@@ -7,7 +7,43 @@ from flask import (
     session,
     url_for
 )
+from json import dumps
+import os
+import logging
+from flask import Flask, g, Response, request
+from neo4j import GraphDatabase, basic_auth
 
+url = os.getenv("NEO4J_URI", "bolt://localhost:7687")
+username = os.getenv("NEO4J_USER", "Daniel_Hurtado")
+password = os.getenv("NEO4J_PASSWORD", "123456")
+neo4jVersion = os.getenv("NEO4J_VERSION", "4")
+database = os.getenv("NEO4J_DATABASE", "taller5")
+port = os.getenv("PORT", 8081)
+
+# Create a database driver instance
+driver = GraphDatabase.driver(url, auth = basic_auth(username, password))
+
+# Connect to database only once and store session in current context
+def get_db():
+    if not hasattr(g, "neo4j_db"):
+        if neo4jVersion.startswith("4"):
+            g.neo4j_db = driver.session(database = database)
+        else:
+            g.neo4j_db = driver.session()
+    return g.neo4j_db
+
+# Close database connection when application context ends
+
+def close_db(error):
+    if hasattr(g, "neo4j_db"):
+        g.neo4j_db.close()
+
+def serialize_Mascota(mascota):
+    return {
+        'Nombre': mascota['name'],
+        'Mascota': mascota['pet'],
+        'Fotografia': mascota['Picture'],
+    }
 class User:
     def __init__(self, id, username, password):
         self.id = id
@@ -57,6 +93,16 @@ def login():
 def profile():
     if not g.user:
         return redirect(url_for('login'))
-        
+
     return render_template('profile.html')
 
+@app.route('/listarMascotas')
+def listar():
+    db = get_db()
+    results = db.read_transaction(lambda tx: list(tx.run("MATCH (d:Pet) <-[:ACTED_IN]-(i:Picture) "
+                                                         "RETURN d.pet as Pet, i.Picture as Fotografia "
+                                                         "LIMIT $limit", {
+                                                             "limit": request.args.get("limit",
+                                                                                       100)})))
+    print(results)
+    return render_template('listarMascotas.html')
