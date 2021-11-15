@@ -96,5 +96,12 @@ def profile():
 
 @app.route('/listarMascotas')
 def listar():
+    db = get_db()
+    results = db.read_transaction(lambda tx: list(tx.run("MATCH (d:Pet) <-[:ACTED_IN]-(i:Picture) "
+                                                         "RETURN d.pet as Pet, i.Picture as Fotografia "
+                                                         "LIMIT $limit", {
+                                                             "limit": request.args.get("limit",
+                                                                                       100)})))
+    print(results)
     return render_template('listarMascotas.html')
 
