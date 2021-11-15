@@ -7,7 +7,43 @@ from flask import (
     session,
     url_for
 )
+from json import dumps
+import os
+import logging
+from flask import Flask, g, Response, request
+from neo4j import GraphDatabase, basic_auth
 
+url = os.getenv("NEO4J_URI", "bolt://localhost:7687")
+username = os.getenv("NEO4J_USER", "Daniel_Hurtado")
+password = os.getenv("NEO4J_PASSWORD", "123456")
+neo4jVersion = os.getenv("NEO4J_VERSION", "4")
+database = os.getenv("NEO4J_DATABASE", "taller5")
+port = os.getenv("PORT", 8081)
+
+# Create a database driver instance
+driver = GraphDatabase.driver(url, auth = basic_auth(username, password))
+
+# Connect to database only once and store session in current context
+def get_db():
+    if not hasattr(g, "neo4j_db"):
+        if neo4jVersion.startswith("4"):
+            g.neo4j_db = driver.session(database = database)
+        else:
+            g.neo4j_db = driver.session()
+    return g.neo4j_db
+
+# Close database connection when application context ends
+
+def close_db(error):
+    if hasattr(g, "neo4j_db"):
+        g.neo4j_db.close()
+
+def serialize_Mascota(mascota):
+    return {
+        'Nombre': mascota['name'],
+        'Mascota': mascota['pet'],
+        'Fotografia': mascota['Picture'],
+    }
 class User:
     def __init__(self, id, username, password):
         self.id = id
@@ -24,6 +60,7 @@ users.append(User(id=3, username='David', password='somethingsimple'))
 
 
 app = Flask(__name__)
+app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.secret_key = 'somesecretkeythatonlyishouldknow'
 
 @app.before_request
@@ -55,5 +92,9 @@ def login():
 def profile():
     if not g.user:
         return redirect(url_for('login'))
-
     return render_template('profile.html')
+
+@app.route('/listarMascotas')
+def listar():
+    return render_template('listarMascotas.html')
+
