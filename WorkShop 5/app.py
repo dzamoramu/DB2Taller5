@@ -13,24 +13,21 @@ import logging
 from flask import Flask, g, Response, request
 from neo4j import GraphDatabase, basic_auth
 
-url = os.getenv("NEO4J_URI", "bolt://localhost:7687")
+"""url = os.getenv("NEO4J_URI", "bolt://localhost:7687")
 username = os.getenv("NEO4J_USER", "Daniel_Hurtado")
 password = os.getenv("NEO4J_PASSWORD", "123456")
 neo4jVersion = os.getenv("NEO4J_VERSION", "4")
-database = os.getenv("NEO4J_DATABASE", "taller5")
-port = os.getenv("PORT", 8081)
+database = os.getenv("NEO4J_DATABASE", "taller5")"""
+#port = os.getenv("PORT", 8081)
+URL = "bolt://localhost:7687"
+USERNAME = "Daniel_Hurtado"
+PASSWORD = "123456"
+DATABASE = "taller5"
 
 # Create a database driver instance
-driver = GraphDatabase.driver(url, auth = basic_auth(username, password))
+driver = GraphDatabase.driver(URL, auth = basic_auth(USERNAME, PASSWORD))
+db = driver.session(database = DATABASE)
 
-# Connect to database only once and store session in current context
-def get_db():
-    if not hasattr(g, "neo4j_db"):
-        if neo4jVersion.startswith("4"):
-            g.neo4j_db = driver.session(database = database)
-        else:
-            g.neo4j_db = driver.session()
-    return g.neo4j_db
 
 # Close database connection when application context ends
 
@@ -93,16 +90,24 @@ def login():
 def profile():
     if not g.user:
         return redirect(url_for('login'))
-
     return render_template('profile.html')
 
-@app.route('/listarMascotas')
-def listar():
-    db = get_db()
-    results = db.read_transaction(lambda tx: list(tx.run("MATCH (d:Pet) <-[:ACTED_IN]-(i:Picture) "
-                                                         "RETURN d.pet as Pet, i.Picture as Fotografia "
-                                                         "LIMIT $limit", {
-                                                             "limit": request.args.get("limit",
-                                                                                       100)})))
-    print(results)
-    return render_template('listarMascotas.html')
+
+
+@app.route("/registrar/<userName>/<category>/<petname>", methods =["POST"])
+def registrarMascota(userName, category, petname):
+    summary = db.write_transaction(lambda tx: tx.run("CREATE (p:Person:Owner {name: '"+userName+"'})-[:OWNS]->(:Pet:"+category+"{name: '"+petname+"'})").consume())
+    db.close()
+    print(summary)
+    print(petname)
+    return "hola", 200
+
+@app.route("/agregar/<petname>/<url>", methods =["POST"])
+def addPhoto(petname, url):
+    added = db.write_transaction(lambda tx: tx.run("MATCH (d:Pet {name: '"+petname+"'}) CREATE (i:Picture {createdAt:  $createdAt}) CREATE (d)-[:APPEARS_IN]->(i)", {"createdAt": url}).consume())    
+    db.close()
+    print(url)
+    print(added)
+    return "ok", 200
+
+

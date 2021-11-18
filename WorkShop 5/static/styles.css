@@ -152,6 +152,9 @@ h3 {
   scroll-snap-align: center;
   scroll-snap-stop: always;
 }
+.photo{
+ margin-top : 2.5rem!important;
+}
 .formulario legend {
   text-align: center;
   font-size: 1.2rem;
