@@ -5,3 +5,8 @@ Pasos Configuración
 3.env\Scripts\activate
 4.flask run
 5.Entrar a http://127.0.0.1:5000/login
+
+Integrantes 
+David Zamora
+Daniel Hurtado
+David Barrera
