@@ -10,3 +10,6 @@ Integrantes
 David Zamora
 Daniel Hurtado
 David Barrera
+
+
+Video de taller: https://www.youtube.com/watch?v=ZimFIkZeOaM
